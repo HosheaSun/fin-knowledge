@@ -4,3 +4,5 @@ build/
 .docusaurus/
 .env.local
 *.log
+
+.vercel
