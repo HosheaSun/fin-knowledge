@@ -1,0 +1,18 @@
+---
+id: documents
+title: 文档库
+sidebar_position: 2
+---
+
+import DocumentCard from '@site/src/components/DocumentCard';
+import documents from '@site/src/data/documents.json';
+
+# 文档库
+
+所有上传的文档都会显示在这里，AI 自动生成的摘要方便快速浏览。
+
+## 文档列表
+
+{documents.map((doc) => (
+  <DocumentCard key={doc.id} document={doc} />
+))}

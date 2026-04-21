@@ -1,0 +1,55 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/docs",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/docs",
+          "mainDocId": "fund/intro",
+          "docs": [
+            {
+              "id": "bank/intro",
+              "path": "/docs/bank/intro",
+              "sidebar": "bank"
+            },
+            {
+              "id": "fund/intro",
+              "path": "/docs/fund/intro",
+              "sidebar": "fund"
+            },
+            {
+              "id": "securities/intro",
+              "path": "/docs/securities/intro",
+              "sidebar": "securities"
+            }
+          ],
+          "draftIds": [],
+          "sidebars": {
+            "fund": {
+              "link": {
+                "path": "/docs/fund/intro",
+                "label": "fund/intro"
+              }
+            },
+            "bank": {
+              "link": {
+                "path": "/docs/bank/intro",
+                "label": "bank/intro"
+              }
+            },
+            "securities": {
+              "link": {
+                "path": "/docs/securities/intro",
+                "label": "securities/intro"
+              }
+            }
+          }
+        }
+      ],
+      "breadcrumbs": true
+    }
+  }
+}

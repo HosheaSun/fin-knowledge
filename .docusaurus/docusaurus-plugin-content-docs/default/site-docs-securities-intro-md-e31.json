@@ -1,0 +1,16 @@
+{
+  "id": "securities/intro",
+  "title": "证券知识库",
+  "description": "证券业务相关文档",
+  "source": "@site/docs/securities/intro.md",
+  "sourceDirName": "securities",
+  "slug": "/securities/intro",
+  "permalink": "/docs/securities/intro",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/your-name/fin-knowledge/edit/main/docs/securities/intro.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "securities"
+}
