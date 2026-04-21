@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from '@docusaurus/router';
+import { useLocation, useHistory } from '@docusaurus/router';
 import Layout from '@theme/Layout';
 
 interface WikiFile {
@@ -15,7 +15,11 @@ const STORAGE_KEY = 'fin_knowledge_wiki';
 
 export default function WikiEdit(): JSX.Element {
   const location = useLocation();
-  const path = location.pathname.replace('/wiki/', '');
+  const history = useHistory();
+
+  // Extract path from URL - handle both /wiki/path and /wiki/path/
+  const path = decodeURIComponent(location.pathname.replace(/^\/wiki\//, '').replace(/\/$/, ''));
+
   const [file, setFile] = useState<WikiFile | null>(null);
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
@@ -23,15 +27,20 @@ export default function WikiEdit(): JSX.Element {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
+    console.log('WikiEdit mounted, path:', path);
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
         const files: WikiFile[] = JSON.parse(stored);
+        console.log('Found files:', files.length);
         const found = files.find((f) => f.path === path);
         if (found) {
+          console.log('Found file:', found.title);
           setFile(found);
           setTitle(found.title);
           setContent(found.content || `# ${found.title}\n\n在此编辑内容...\n`);
+        } else {
+          console.log('File not found for path:', path);
         }
       } catch (e) {
         console.error('Failed to parse wiki files:', e);
@@ -71,7 +80,7 @@ export default function WikiEdit(): JSX.Element {
         const files: WikiFile[] = JSON.parse(stored);
         const updated = files.filter((f) => f.id !== file.id);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        window.location.href = '/wiki';
+        history.push('/wiki');
       } catch (e) {
         console.error('Failed to delete:', e);
       }
@@ -83,7 +92,8 @@ export default function WikiEdit(): JSX.Element {
       <Layout title="加载中">
         <div style={{ padding: '2rem', textAlign: 'center' }}>
           <p>文档不存在</p>
-          <a href="/wiki">返回知识库</a>
+          <p style={{ color: '#999', fontSize: '0.9rem' }}>Path: {path}</p>
+          <a href="/wiki" style={{ color: '#2e8555' }}>返回知识库</a>
         </div>
       </Layout>
     );
@@ -136,18 +146,19 @@ export default function WikiEdit(): JSX.Element {
             >
               删除
             </button>
-            <a
-              href="/wiki"
+            <button
+              onClick={() => history.push('/wiki')}
               style={{
                 padding: '0.5rem 1rem',
                 background: '#999',
                 color: '#fff',
+                border: 'none',
                 borderRadius: '4px',
-                textDecoration: 'none',
+                cursor: 'pointer',
               }}
             >
               返回
-            </a>
+            </button>
           </div>
         </div>
 
@@ -165,6 +176,7 @@ export default function WikiEdit(): JSX.Element {
             resize: 'vertical',
             outline: 'none',
             lineHeight: 1.6,
+            boxSizing: 'border-box',
           }}
         />
 

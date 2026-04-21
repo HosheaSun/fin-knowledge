@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from '@docusaurus/Link';
+import { useHistory } from '@docusaurus/router';
 import Layout from '@theme/Layout';
 
 interface WikiFile {
@@ -13,10 +14,12 @@ interface WikiFile {
 const STORAGE_KEY = 'fin_knowledge_wiki';
 
 export default function WikiHome(): JSX.Element {
+  const history = useHistory();
   const [files, setFiles] = useState<WikiFile[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [generating, setGenerating] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -32,7 +35,17 @@ export default function WikiHome(): JSX.Element {
     }
   }, []);
 
+  useEffect(() => {
+    if (showForm && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [showForm]);
+
   const createFile = (title: string, type: 'auto' | 'manual' = 'manual') => {
+    if (!title.trim()) {
+      alert('请输入文档标题');
+      return;
+    }
     const id = Date.now().toString();
     const path = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     const newFile: WikiFile = {
@@ -47,7 +60,7 @@ export default function WikiHome(): JSX.Element {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     setNewTitle('');
     setShowForm(false);
-    window.location.href = `/wiki/${path}`;
+    history.push(`/wiki/${path}`);
   };
 
   const generateWithAI = async () => {
@@ -80,6 +93,13 @@ export default function WikiHome(): JSX.Element {
     setGenerating(false);
   };
 
+  const toggleForm = () => {
+    setShowForm(!showForm);
+    if (!showForm) {
+      setNewTitle('');
+    }
+  };
+
   return (
     <Layout title="Wiki" description="个人知识库">
       <div style={{ padding: '2rem', maxWidth: 800, margin: '0 auto' }}>
@@ -104,7 +124,7 @@ export default function WikiHome(): JSX.Element {
               {generating ? '生成中...' : 'AI 生成摘要'}
             </button>
             <button
-              onClick={() => setShowForm(!showForm)}
+              onClick={toggleForm}
               style={{
                 padding: '0.5rem 1rem',
                 background: '#2e8555',
@@ -114,7 +134,7 @@ export default function WikiHome(): JSX.Element {
                 cursor: 'pointer',
               }}
             >
-              新建文档
+              {showForm ? '取消' : '新建文档'}
             </button>
           </div>
         </div>
@@ -122,10 +142,11 @@ export default function WikiHome(): JSX.Element {
         {showForm && (
           <div style={{ marginBottom: '2rem', padding: '1rem', background: '#f5f5f5', borderRadius: '8px' }}>
             <input
+              ref={inputRef}
               type="text"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="文档标题"
+              placeholder="输入文档标题，按回车创建"
               style={{
                 width: '100%',
                 padding: '0.75rem',
@@ -133,36 +154,28 @@ export default function WikiHome(): JSX.Element {
                 borderRadius: '4px',
                 marginBottom: '0.5rem',
                 fontSize: '1rem',
+                boxSizing: 'border-box',
               }}
-              onKeyDown={(e) => e.key === 'Enter' && newTitle && createFile(newTitle)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newTitle.trim()) {
+                  createFile(newTitle);
+                }
+              }}
             />
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
-                onClick={() => newTitle && createFile(newTitle)}
-                disabled={!newTitle}
+                onClick={() => createFile(newTitle)}
+                disabled={!newTitle.trim()}
                 style={{
                   padding: '0.5rem 1rem',
-                  background: newTitle ? '#2e8555' : '#ccc',
+                  background: newTitle.trim() ? '#2e8555' : '#ccc',
                   color: '#fff',
                   border: 'none',
                   borderRadius: '4px',
-                  cursor: newTitle ? 'pointer' : 'not-allowed',
+                  cursor: newTitle.trim() ? 'pointer' : 'not-allowed',
                 }}
               >
                 创建
-              </button>
-              <button
-                onClick={() => { setShowForm(false); setNewTitle(''); }}
-                style={{
-                  padding: '0.5rem 1rem',
-                  background: '#999',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-              >
-                取消
               </button>
             </div>
           </div>
