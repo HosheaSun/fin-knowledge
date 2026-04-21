@@ -12,18 +12,30 @@ interface UploadResponse {
   error?: string;
 }
 
+const STORAGE_KEY = 'fin_knowledge_documents';
+
+interface Document {
+  id: string;
+  filename: string;
+  title: string;
+  summary: string;
+  keywords: string[];
+  category: string;
+  uploadDate: string;
+}
+
 export default function FileUpload() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [result, setResult] = useState<UploadResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
     if (selected) {
       setFile(selected);
-      setResult(null);
       setError(null);
+      setSuccess(false);
     }
   };
 
@@ -41,8 +53,25 @@ export default function FileUpload() {
         filename: file.name,
       });
 
-      if (response.data.success) {
-        setResult(response.data);
+      if (response.data.success && response.data.summary) {
+        // 保存到 localStorage
+        const doc: Document = {
+          id: Date.now().toString(),
+          filename: file.name,
+          title: response.data.summary.title || file.name.replace(/\.[^.]+$/, ''),
+          summary: response.data.summary.summary,
+          keywords: response.data.summary.keywords || [],
+          category: response.data.summary.category || '未分类',
+          uploadDate: new Date().toLocaleDateString('zh-CN'),
+        };
+
+        const stored = localStorage.getItem(STORAGE_KEY);
+        const docs: Document[] = stored ? JSON.parse(stored) : [];
+        docs.unshift(doc);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(docs));
+
+        setSuccess(true);
+        setFile(null);
       } else {
         setError(response.data.error || '上传失败');
       }
@@ -91,13 +120,12 @@ export default function FileUpload() {
         </div>
       )}
 
-      {result && (
-        <div style={{margin: '2rem 0', padding: '1.5rem', background: '#f0f8f0', borderRadius: '8px'}}>
-          <h2>AI 摘要结果</h2>
-          <h3>{result.summary?.title}</h3>
-          <p><strong>摘要:</strong> {result.summary?.summary}</p>
-          <p><strong>关键词:</strong> {result.summary?.keywords?.join(', ')}</p>
-          <p><strong>建议分类:</strong> {result.summary?.category}</p>
+      {success && (
+        <div style={{margin: '1rem 0', padding: '1rem', background: '#e8f5e9', color: '#2e8555', borderRadius: '8px'}}>
+          <p><strong>上传成功！</strong> 文档已保存到文档库。</p>
+          <p style={{marginTop: '0.5rem'}}>
+            <a href="/documents" style={{color: '#2e8555'}}>点击查看文档库 →</a>
+          </p>
         </div>
       )}
     </div>
