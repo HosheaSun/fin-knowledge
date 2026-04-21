@@ -1,6 +1,23 @@
 {
-  "buildCommand": "npx docusaurus build",
-  "outputDirectory": "build",
-  "installCommand": "npm install",
-  "framework": "docusaurus"
+  "version": 2,
+  "builds": [
+    {
+      "src": "build/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "api/**/*.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/summarize",
+      "dest": "/api/summarize"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "build/$1"
+    }
+  ]
 }

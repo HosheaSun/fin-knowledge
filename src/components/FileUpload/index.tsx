@@ -3,13 +3,13 @@ import axios from 'axios';
 
 interface UploadResponse {
   success: boolean;
-  filename: string;
   summary?: {
     title: string;
     summary: string;
     keywords: string[];
     category: string;
   };
+  error?: string;
 }
 
 export default function FileUpload() {
@@ -34,16 +34,20 @@ export default function FileUpload() {
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const fileContent = await file.text();
 
-      const response = await axios.post<UploadResponse>('/api/summarize', formData, {
-        headers: {'Content-Type': 'multipart/form-data'},
+      const response = await axios.post<UploadResponse>('/api/summarize', {
+        file: fileContent,
+        filename: file.name,
       });
 
-      setResult(response.data);
-    } catch (err) {
-      setError('上传失败，请重试');
+      if (response.data.success) {
+        setResult(response.data);
+      } else {
+        setError(response.data.error || '上传失败');
+      }
+    } catch (err: any) {
+      setError(err?.response?.data?.error || '上传失败，请重试');
     } finally {
       setUploading(false);
     }
@@ -90,7 +94,7 @@ export default function FileUpload() {
       {result && (
         <div style={{margin: '2rem 0', padding: '1.5rem', background: '#f0f8f0', borderRadius: '8px'}}>
           <h2>AI 摘要结果</h2>
-          <h3>{result.summary?.title || result.filename}</h3>
+          <h3>{result.summary?.title}</h3>
           <p><strong>摘要:</strong> {result.summary?.summary}</p>
           <p><strong>关键词:</strong> {result.summary?.keywords?.join(', ')}</p>
           <p><strong>建议分类:</strong> {result.summary?.category}</p>
