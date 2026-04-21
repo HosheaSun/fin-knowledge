@@ -6,10 +6,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { file, apiKey, groupId } = req.body;
+    const { file, filename } = req.body;
 
-    if (!file || !apiKey || !groupId) {
-      return res.status(400).json({ error: 'Missing parameters' });
+    if (!file) {
+      return res.status(400).json({ error: 'Missing file content' });
+    }
+
+    const apiKey = process.env.MINIMAX_API_KEY;
+    const groupId = process.env.MINIMAX_GROUP_ID;
+
+    if (!apiKey || !groupId) {
+      return res.status(500).json({ error: 'API credentials not configured' });
     }
 
     const response = await fetch('https://api.minimax.chat/v1/text/chatcompletion_pro', {
@@ -49,7 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const content = data.choices?.[0]?.message?.content;
 
     let summary = {
-      title: '文档摘要',
+      title: filename?.replace(/\.[^.]+$/, '') || '文档摘要',
       summary: '摘要生成失败',
       keywords: [],
       category: '未分类',
