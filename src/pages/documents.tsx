@@ -1,37 +1,41 @@
----
-id: documents
-title: 文档库
-sidebar_position: 2
----
+import React, { useState, useEffect } from 'react';
 
-import { useState, useEffect } from 'react';
-
-# 文档库
-
-所有上传的文档都会显示在这里，AI 自动生成的摘要方便快速浏览。
+interface Document {
+  id: string;
+  filename: string;
+  title: string;
+  summary: string;
+  keywords: string[];
+  category: string;
+  uploadDate: string;
+}
 
 export default function Documents() {
-  const [documents, setDocuments] = useState([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
 
   useEffect(() => {
     const stored = localStorage.getItem('fin_knowledge_documents');
     if (stored) {
-      setDocuments(JSON.parse(stored));
+      try {
+        setDocuments(JSON.parse(stored));
+      } catch {
+        setDocuments([]);
+      }
     }
   }, []);
 
   if (documents.length === 0) {
     return (
-      <div style={{padding: '2rem', textAlign: 'center', color: '#666'}}>
+      <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
         <p>暂无文档</p>
-        <p><a href="/upload" style={{color: '#2e8555'}}>上传第一个文档 →</a></p>
+        <p><a href="/upload" style={{ color: '#2e8555' }}>上传第一个文档 →</a></p>
       </div>
     );
   }
 
   return (
-    <div style={{padding: '2rem'}}>
-      <p style={{marginBottom: '2rem', color: '#666'}}>
+    <div style={{ padding: '2rem' }}>
+      <p style={{ marginBottom: '2rem', color: '#666' }}>
         共 {documents.length} 篇文档
       </p>
       {documents.map((doc) => (
@@ -45,12 +49,12 @@ export default function Documents() {
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
           }}
         >
-          <h3 style={{marginBottom: '0.5rem', color: '#2e8555'}}>{doc.title}</h3>
-          <p style={{color: '#666', fontSize: '0.9rem', marginBottom: '1rem'}}>
+          <h3 style={{ marginBottom: '0.5rem', color: '#2e8555' }}>{doc.title}</h3>
+          <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '1rem' }}>
             {doc.summary}
           </p>
-          <div style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem'}}>
-            {doc.keywords.map((kw) => (
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            {doc.keywords.map((kw: string) => (
               <span
                 key={kw}
                 style={{
@@ -65,7 +69,7 @@ export default function Documents() {
               </span>
             ))}
           </div>
-          <div style={{display: 'flex', justifyContent: 'space-between', color: '#999', fontSize: '0.8rem'}}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#999', fontSize: '0.8rem' }}>
             <span>{doc.category}</span>
             <span>{doc.uploadDate}</span>
           </div>
