@@ -67,6 +67,11 @@ const config: ConfigOptions = {
           position: 'left',
           label: '上传文档',
         },
+        {
+          to: '/wiki',
+          position: 'left',
+          label: 'Wiki',
+        },
       ],
     },
     footer: {
